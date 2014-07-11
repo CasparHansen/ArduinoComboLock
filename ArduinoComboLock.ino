@@ -1,4 +1,4 @@
-/*ComboLockLED.ino
+/*ArduinoComboLock.ino
  Caspar Hansen, 07/2014
  Use an encoder as a dial for a combination lock
  Four digits, turn three times to the right to reset
