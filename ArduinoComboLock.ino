@@ -29,7 +29,9 @@ int loops = 0;
 int combo[4];
 int combopos = -1;
 int secret[4] = {
-  3, 5, 8, 9};
+  3, 5, 8, 9}; //Code to unlock
+int deltaPos = 0;
+int debounce = 2; //Must move by at least 2 counts for a poor man's debounce
 
 void loop() {
   newPosition = myEnc.read();
@@ -37,71 +39,76 @@ void loop() {
 
   if (newPosition != oldPosition) 
   {
-    //CCW turn = increasing count, CW = decresing
-    //in order to match common lock dials
-    if (newPosition > oldPosition)
+    deltaPos += (newPosition - oldPosition);
+    if (abs(deltaPos) >= debounce)
     {
-      value = mSpinner.Decrement();
-      CCW = true;
-    }
-    else
-    {
-      value = mSpinner.Increment();
-      CCW = false;
-      
-      //Keep track of how many times you make a revolution for reset
-      if(value == 0)
-        loops++;
-        
-      if(loops == 3)
+      deltaPos = 0;
+
+      //CCW turn = increasing count, CW = decresing
+      //in order to match common lock dials
+      if (newPosition > oldPosition)
       {
-        loops = 0;
-        combo[0] = 0;
-        combo[1] = 0;
-        combo[2] = 0;
-        combo[3] = 0;
-        combopos = 0;
+        value = mSpinner.Decrement();
+        CCW = true;
       }
+      else
+      {
+        value = mSpinner.Increment();
+        CCW = false;
+
+        //Keep track of how many times you make a revolution for reset
+        if(value == 0)
+          loops++;
+
+        if(loops == 3) // Turn three times clockwise to reset
+        {
+          loops = 0;
+          combo[0] = 0;
+          combo[1] = 0;
+          combo[2] = 0;
+          combo[3] = 0;
+          combopos = 0;
+        }
+      }
+
+      if (oldCCW != CCW) // Change direction - move to the next digit
+      {
+        combopos++;
+        loops = 0;
+      }
+
+      //Don't overflow
+      if(combopos < 4 && combopos > -1)
+        combo[combopos] = value;
+
+      /*For debugging, print to serial:
+       CCCC DLU
+       C: 4 combo digits
+       D: Direction of turning (L or R)
+       L: Number of loops
+       U: Lock unlocked
+       */
+
+      for (int i = 0; i < 4; i++)
+      {
+        Serial.print(combo[i]);
+      }
+
+      if (CCW == true)
+        Serial.print(" L");  
+      else
+        Serial.print(" R");
+
+      Serial.print(loops);
+
+      Serial.print(IsUnlocked());
+
+      Serial.println("");
+
+      oldPosition = newPosition;
+      oldCCW = CCW;    
     }
-    
-    if (oldCCW != CCW)
-    {
-      combopos++;
-      loops = 0;
-    }
-    
-    //Don't overflow
-    if(combopos < 4 && combopos > -1)
-      combo[combopos] = value;
-
-    /*For debugging, print to serial:
-    CCCC DLU
-    C: 4 combo digits
-    D: Direction of turning
-    L: Number of loops
-    U: Lock unlocked
-    */
-    
-    for (int i = 0; i < 4; i++)
-    {
-      Serial.print(combo[i]);
-    }
-
-    if (CCW == true)
-      Serial.print(" L");  
-    else
-       Serial.print(" R");
-
-    Serial.print(loops);
-
-    Serial.print(IsUnlocked());
-
-    Serial.println("");
-
-    oldPosition = newPosition;
-    oldCCW = CCW;    
   }
-
 }
 
 boolean IsUnlocked()
@@ -117,17 +124,3 @@ boolean IsUnlocked()
   }
   return false;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
