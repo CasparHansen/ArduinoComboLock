@@ -31,6 +31,7 @@ int combo[4];
 int combopos = -1;
 int comboDisplay = 0;
 int secret[4] = {3, 5, 8, 9}; //Code to unlock
+int unlockedDisplay[4] = {0, 11, 12, 13}; //Special digits for notification that the lock is open: "OPEN". Numeral "0" used in place of "O"
 int deltaPos = 0;
 int debounce = 2; //Must move by at least 2 counts for a poor man's debounce
 
@@ -195,7 +196,11 @@ void displayNumber(int* toDisplay) {
     }
 
     //Turn on the right segments for this digit
-    lightNumber(toDisplay[digit] % 10);
+
+    if(IsUnlocked())
+      lightNumber(unlockedDisplay[digit]);
+    else
+      lightNumber(toDisplay[digit] % 10);
 
 
     delayMicroseconds(DISPLAY_BRIGHTNESS); //Display this digit for a fraction of a second (between 1us and 5000us, 500 is pretty good)
@@ -331,6 +336,36 @@ void lightNumber(int numberToDisplay) {
     digitalWrite(segD, SEGMENT_OFF);
     digitalWrite(segE, SEGMENT_OFF);
     digitalWrite(segF, SEGMENT_OFF);
+    digitalWrite(segG, SEGMENT_OFF);
+    break;
+    
+  case 11: //"P"
+    digitalWrite(segA, SEGMENT_ON);
+    digitalWrite(segB, SEGMENT_ON);
+    digitalWrite(segC, SEGMENT_OFF);
+    digitalWrite(segD, SEGMENT_OFF);
+    digitalWrite(segE, SEGMENT_ON);
+    digitalWrite(segF, SEGMENT_ON);
+    digitalWrite(segG, SEGMENT_ON);
+    break;
+    
+  case 12: //"E"
+    digitalWrite(segA, SEGMENT_ON);
+    digitalWrite(segB, SEGMENT_OFF);
+    digitalWrite(segC, SEGMENT_OFF);
+    digitalWrite(segD, SEGMENT_ON);
+    digitalWrite(segE, SEGMENT_ON);
+    digitalWrite(segF, SEGMENT_ON);
+    digitalWrite(segG, SEGMENT_ON);
+    break;
+    
+  case 13: //"N"
+    digitalWrite(segA, SEGMENT_ON);
+    digitalWrite(segB, SEGMENT_ON);
+    digitalWrite(segC, SEGMENT_ON);
+    digitalWrite(segD, SEGMENT_OFF);
+    digitalWrite(segE, SEGMENT_ON);
+    digitalWrite(segF, SEGMENT_ON);
     digitalWrite(segG, SEGMENT_OFF);
     break;
   }
