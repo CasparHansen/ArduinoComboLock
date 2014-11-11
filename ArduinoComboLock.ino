@@ -198,7 +198,10 @@ void displayNumber(int* toDisplay) {
     //Turn on the right segments for this digit
 
     if(IsUnlocked())
+    {
       lightNumber(unlockedDisplay[digit]);
+      delay(150);
+    }
     else
       lightNumber(toDisplay[digit] % 10);
 
